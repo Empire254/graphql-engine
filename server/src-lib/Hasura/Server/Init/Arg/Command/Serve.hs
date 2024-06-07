@@ -69,8 +69,7 @@ module Hasura.Server.Init.Arg.Command.Serve
     asyncActionsFetchBatchSizeOption,
     persistedQueriesOption,
     persistedQueriesTtlOption,
-    remoteSchemaResponsePriorityOption,
-    configuredHeaderPrecedenceOption,
+    traceQueryStatusOption,
 
     -- * Pretty Printer
     serveCmdFooter,
@@ -165,8 +164,7 @@ serveCommandParser =
     <*> parseAsyncActionsFetchBatchSize
     <*> parsePersistedQueries
     <*> parsePersistedQueriesTtl
-    <*> parseRemoteSchemaResponsePriority
-    <*> parseConfiguredHeaderPrecedence
+    <*> parseTraceQueryStatus
 
 --------------------------------------------------------------------------------
 -- Serve Options
@@ -1316,39 +1314,21 @@ parsePersistedQueriesTtl =
           <> Opt.help (Config._helpMessage persistedQueriesTtlOption)
       )
 
-remoteSchemaResponsePriorityOption :: Config.Option (Types.RemoteSchemaResponsePriority)
-remoteSchemaResponsePriorityOption =
-  Config.Option
-    { Config._default = Types.RemoteSchemaResponseErrors,
-      Config._envVar = "HASURA_GRAPHQL_REMOTE_SCHEMA_PRIORITIZE_DATA",
-      Config._helpMessage = "Prioritize data over errors for remote schema responses (default: false)."
-    }
-
-parseRemoteSchemaResponsePriority :: Opt.Parser (Maybe Types.RemoteSchemaResponsePriority)
-parseRemoteSchemaResponsePriority =
-  (bool Nothing (Just Types.RemoteSchemaResponseData))
+parseTraceQueryStatus :: Opt.Parser (Maybe Types.TraceQueryStatus)
+parseTraceQueryStatus =
+  (bool Nothing (Just Types.TraceQueryEnabled))
     <$> Opt.switch
-      ( Opt.long "remote-schema-prioritize-data"
-          <> Opt.help (Config._helpMessage remoteSchemaResponsePriorityOption)
+      ( Opt.long "trace-sql-query"
+          <> Opt.help (Config._helpMessage traceQueryStatusOption)
       )
 
-parseConfiguredHeaderPrecedence :: Opt.Parser (Maybe Types.HeaderPrecedence)
-parseConfiguredHeaderPrecedence =
-  Opt.optional
-    $ Opt.option
-      (Opt.eitherReader Env.fromEnv)
-      ( Opt.long "configured-header-precedence"
-          <> Opt.help (Config._helpMessage configuredHeaderPrecedenceOption)
-      )
-
-configuredHeaderPrecedenceOption :: Config.Option Types.HeaderPrecedence
-configuredHeaderPrecedenceOption =
+traceQueryStatusOption :: Config.Option Types.TraceQueryStatus
+traceQueryStatusOption =
   Config.Option
-    { Config._default = Types.ClientHeadersFirst,
-      Config._envVar = "HASURA_GRAPHQL_CONFIGURED_HEADER_PRECEDENCE",
+    { Config._default = Types.TraceQueryDisabled,
+      Config._envVar = "HASURA_GRAPHQL_ENABLE_QUERY_TRACING",
       Config._helpMessage =
-        "Forward configured metadata headers with higher precedence than client headers"
-          <> "when delivering payload to webhook for actions and input validations. (default: false)"
+        "Enable query tracing for all queries. (default: false)"
     }
 
 --------------------------------------------------------------------------------

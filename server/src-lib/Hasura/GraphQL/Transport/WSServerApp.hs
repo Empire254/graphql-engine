@@ -97,10 +97,9 @@ createWSServerApp enabledLogTypes serverEnv connInitTimeout licenseKeyCache = \ 
       flip runReaderT serverEnv $ onConn rid rh ip (wsActions sp)
 
     onMessageHandler conn bs sp = do
-      headerPrecedence <- liftIO $ acHeaderPrecedence <$> getAppContext (_wseAppStateRef serverEnv)
-      responseErrorsConfig <- liftIO $ acResponseInternalErrorsConfig <$> getAppContext (_wseAppStateRef serverEnv)
+      traceQueryStatus <- liftIO $ acTraceQueryStatus <$> getAppContext (_wseAppStateRef serverEnv)
       mask_
-        $ onMessage enabledLogTypes getAuthMode serverEnv conn bs (wsActions sp) licenseKeyCache responseErrorsConfig headerPrecedence
+        $ onMessage enabledLogTypes getAuthMode serverEnv conn bs (wsActions sp) licenseKeyCache traceQueryStatus
 
     onCloseHandler conn = mask_ do
       granularPrometheusMetricsState <- runGetPrometheusMetricsGranularity

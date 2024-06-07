@@ -100,8 +100,7 @@ emptyServeOptionsRaw =
       rsoAsyncActionsFetchBatchSize = Nothing,
       rsoPersistedQueries = Nothing,
       rsoPersistedQueriesTtl = Nothing,
-      rsoRemoteSchemaResponsePriority = Nothing,
-      rsoHeaderPrecedence = Nothing
+      rsoTraceQueryStatus = Nothing
     }
 
 mkServeOptionsSpec :: Hspec.Spec

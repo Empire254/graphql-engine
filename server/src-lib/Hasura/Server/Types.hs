@@ -363,37 +363,17 @@ instance (MonadGetPolicies m) => MonadGetPolicies (StateT w m) where
   runGetPrometheusMetricsGranularity = lift runGetPrometheusMetricsGranularity
   runGetModelInfoLogStatus = lift $ runGetModelInfoLogStatus
 
--- | The priority of the response to be sent to the client for remote schema fields if there is both errors as well as
--- data in the remote response.
--- Read more about how we decode the remote response at `decodeGraphQLResp` in `Hasura.GraphQL.Transport.HTTP`
---
--- If there is both errors and data in the remote response, then:
---
--- * If the priority is set to `RemoteSchemaResponseData`, then the data is sent to the client.
--- * If the priority is set to `RemoteSchemaResponseErrors`, then the errors are sent to the client.
-data RemoteSchemaResponsePriority
-  = -- | Data from the remote schema is sent
-    RemoteSchemaResponseData
-  | -- | Errors from the remote schema is sent
-    RemoteSchemaResponseErrors
-
--- | The precedence of the headers when delivering payload to the webhook for actions.
--- Default is `ClientHeadersFirst` to preserve the old behaviour where client headers are
--- given higher precedence than configured metadata headers.
-data HeaderPrecedence
-  = ConfiguredHeadersFirst
-  | ClientHeadersFirst
+data TraceQueryStatus
+  = TraceQueryEnabled
+  | TraceQueryDisabled
   deriving (Eq, Show, Generic)
 
-instance FromJSON HeaderPrecedence where
-  parseJSON =
-    withBool "HeaderPrecedence"
-      $ pure
-      . \case
-        True -> ConfiguredHeadersFirst
-        False -> ClientHeadersFirst
+instance FromJSON TraceQueryStatus where
+  parseJSON = withBool "TraceQueryStatus" $ \case
+    False -> pure TraceQueryDisabled
+    True -> pure TraceQueryEnabled
 
-instance ToJSON HeaderPrecedence where
+instance ToJSON TraceQueryStatus where
   toJSON = \case
-    ConfiguredHeadersFirst -> Bool True
-    ClientHeadersFirst -> Bool False
+    TraceQueryDisabled -> Bool False
+    TraceQueryEnabled -> Bool True
